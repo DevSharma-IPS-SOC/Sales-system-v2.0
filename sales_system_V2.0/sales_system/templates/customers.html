@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customers & Invoices</title>
+    <style>
+        :root { --primary:#2c8cfb; --primary-light:#5cacfa; --primary-dark:#1a5fb4; --white:#fff; --gray-dark:#2d3748; --border:#e2e8f0; --success:#28a745; --danger:#e74c3c; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI',sans-serif; background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%); min-height:100vh; color:var(--gray-dark); }
+        .navbar { background:var(--white); box-shadow:0 2px 8px rgba(44,140,251,0.1); padding:0 25px; display:flex; justify-content:space-between; align-items:center; height:60px; }
+        .navbar-logo { font-size:1.4em; font-weight:700; color:var(--primary); }
+        .navbar-links { display:flex; gap:5px; align-items:center; }
+        .navbar-link { color:var(--gray-dark); text-decoration:none; font-weight:600; padding:7px 14px; border-radius:6px; transition:all 0.3s; font-size:0.9em; cursor:pointer; }
+        .navbar-link:hover, .navbar-link.active { background:var(--primary); color:var(--white); }
+        .navbar-link.logout { background:var(--danger); color:var(--white); }
+        .navbar-user { color:#888; font-size:0.85em; padding:0 8px; }
+        .container { max-width:1400px; margin:25px auto; padding:0 20px; }
+        .page-title { text-align:center; color:var(--white); margin-bottom:20px; font-size:1.8em; }
+
+        .tab-nav { display:flex; gap:10px; margin-bottom:22px; background:var(--white); padding:12px; border-radius:12px; box-shadow:0 4px 12px rgba(44,140,251,0.1); }
+        .tab-btn { padding:9px 22px; border:2px solid var(--border); border-radius:8px; background:var(--white); cursor:pointer; font-weight:600; font-size:0.9em; transition:all 0.3s; }
+        .tab-btn.active { background:var(--primary); color:var(--white); border-color:var(--primary); }
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
+
+        .card { background:var(--white); border-radius:12px; padding:22px; box-shadow:0 4px 12px rgba(44,140,251,0.1); margin-bottom:22px; }
+        .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+        .card-header h2 { color:var(--primary); font-size:1.2em; }
+
+        .search-bar { display:flex; gap:10px; margin-bottom:16px; }
+        .search-bar input { flex:1; padding:10px 14px; border:2px solid var(--border); border-radius:8px; font-size:0.95em; }
+        .search-bar input:focus { outline:none; border-color:var(--primary); }
+        .btn { padding:10px 18px; border:none; border-radius:8px; font-weight:600; cursor:pointer; transition:all 0.3s; font-size:0.9em; }
+        .btn:hover { transform:translateY(-1px); }
+        .btn-primary { background:var(--primary); color:var(--white); }
+        .btn-success { background:var(--success); color:var(--white); }
+        .btn-danger { background:var(--danger); color:var(--white); }
+        .btn-sm { padding:6px 12px; font-size:0.82em; }
+        .btn-outline { background:transparent; border:2px solid var(--primary); color:var(--primary); }
+
+        table { width:100%; border-collapse:collapse; }
+        thead { background:linear-gradient(90deg,var(--primary),var(--primary-light)); color:var(--white); }
+        thead th { padding:12px 14px; text-align:left; font-weight:600; font-size:0.82em; text-transform:uppercase; }
+        tbody tr { border-bottom:1px solid var(--border); transition:background 0.2s; }
+        tbody tr:hover { background:rgba(92,172,250,0.05); }
+        tbody td { padding:11px 14px; font-size:0.92em; }
+        .empty-state { text-align:center; color:#999; padding:40px !important; }
+
+        .filter-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:16px; align-items:end; }
+        .filter-group { display:flex; flex-direction:column; }
+        .filter-group label { font-weight:700; color:#446285; margin-bottom:5px; font-size:0.8em; text-transform:uppercase; }
+        .filter-group input, .filter-group select { padding:9px 12px; border:2px solid var(--border); border-radius:8px; font-size:0.9em; }
+        .filter-group input:focus, .filter-group select:focus { outline:none; border-color:var(--primary); }
+
+        .modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.7); }
+        .modal.show { display:flex; justify-content:center; align-items:center; animation:fadeIn 0.3s; }
+        .modal-content { background:var(--white); padding:30px; border-radius:16px; width:90%; max-width:520px; box-shadow:0 20px 60px rgba(0,0,0,0.3); animation:slideDown 0.3s; position:relative; max-height:90vh; overflow-y:auto; }
+        .modal-content h2 { color:var(--white); background:linear-gradient(135deg,var(--primary),var(--primary-light)); padding:15px; margin:-30px -30px 20px -30px; border-radius:15px 15px 0 0; font-size:1.15em; }
+        .close { color:var(--white); position:absolute; right:22px; top:17px; font-size:28px; cursor:pointer; }
+        .form-group { display:flex; flex-direction:column; margin-bottom:14px; }
+        .form-group label { font-weight:600; margin-bottom:6px; font-size:0.9em; }
+        .form-group input { padding:10px 12px; border:2px solid var(--border); border-radius:8px; font-size:0.95em; }
+        .form-group input:focus { outline:none; border-color:var(--primary); }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .btn-submit { background:var(--primary); color:var(--white); width:100%; padding:12px; border:none; border-radius:8px; font-weight:600; cursor:pointer; font-size:1em; margin-top:8px; }
+
+        .customer-detail-modal .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:18px; }
+        .mini-stat { background:#f5f7fa; border-radius:8px; padding:12px; text-align:center; }
+        .mini-stat h4 { font-size:0.75em; color:#666; text-transform:uppercase; margin-bottom:5px; }
+        .mini-stat p { font-weight:700; color:var(--primary); font-size:1.2em; }
+
+        .invoice-badge { font-size:0.75em; padding:3px 8px; border-radius:10px; background:#e3f2fd; color:var(--primary); font-weight:600; }
+        .payment-badge { font-size:0.75em; padding:3px 8px; border-radius:10px; font-weight:600; }
+        .pay-cash { background:#e8f5e9; color:#2e7d32; }
+        .pay-upi { background:#e3f2fd; color:#1565c0; }
+        .pay-card { background:#fff3e0; color:#e65100; }
+        .pay-other { background:#f3e5f5; color:#6a1b9a; }
+
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        @keyframes slideDown { from{transform:translateY(-40px);opacity:0} to{transform:translateY(0);opacity:1} }
+        .success-msg, .error-msg { padding:12px 16px; border-radius:8px; font-weight:600; position:fixed; top:20px; right:20px; z-index:5000; min-width:280px; }
+        .success-msg { background:#d4edda; color:#155724; border-left:4px solid #28a745; }
+        .error-msg { background:#f8d7da; color:#721c24; border-left:4px solid #e74c3c; }
+        @media(max-width:768px) { .filter-row { grid-template-columns:1fr; } .form-row { grid-template-columns:1fr; } }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="navbar-logo">Sales Analysis</div>
+    <div class="navbar-links">
+        <a href="/dashboard" class="navbar-link">Dashboard</a>
+        <a href="/analytics" class="navbar-link">Analytics</a>
+        <a href="/customers" class="navbar-link active">Customers</a>
+        <span class="navbar-user">{{ username }}</span>
+        <a href="/logout" class="navbar-link logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <h1 class="page-title">Customers & Billing</h1>
+
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('customers', this)">Customers</button>
+        <button class="tab-btn" onclick="switchTab('invoices', this)" id="invoicesTabBtn">Invoice History</button>
+    </div>
+
+    <!-- CUSTOMERS TAB -->
+    <div id="tab-customers" class="tab-content active">
+        <div class="card">
+            <div class="card-header">
+                <h2>Customer Directory</h2>
+                <button class="btn btn-primary" onclick="openAddCustomerModal()">+ Add Customer</button>
+            </div>
+            <div class="search-bar">
+                <input type="text" id="customerSearch" placeholder="Search by name, phone, or email..." oninput="searchCustomers()">
+            </div>
+            <div style="overflow-x:auto">
+            <table>
+                <thead>
+                    <tr><th>#</th><th>Name</th><th>Phone</th><th>Email</th><th>GST Number</th><th>Address</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="customersTableBody">
+                    <tr><td colspan="7" class="empty-state">Loading customers...</td></tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- INVOICES TAB -->
+    <div id="tab-invoices" class="tab-content">
+        <div class="card">
+            <div class="card-header">
+                <h2>Invoice History</h2>
+            </div>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Customer</label>
+                    <select id="invoiceCustomerFilter" onchange="loadInvoices()">
+                        <option value="">All Customers</option>
+                    </select>
+                </div>
+                <div class="filter-group"><label>From Date</label><input type="date" id="invoiceDateFrom" onchange="loadInvoices()"></div>
+                <div class="filter-group"><label>To Date</label><input type="date" id="invoiceDateTo" onchange="loadInvoices()"></div>
+                <div class="filter-group" style="align-self:end">
+                    <button class="btn btn-outline" onclick="clearInvoiceFilters()">Clear Filters</button>
+                </div>
+            </div>
+            <div style="overflow-x:auto">
+            <table>
+                <thead>
+                    <tr><th>Invoice #</th><th>Date</th><th>Customer</th><th>Item</th><th>Qty</th><th>Amount</th><th>Profit</th><th>Payment</th><th>By</th><th>Action</th></tr>
+                </thead>
+                <tbody id="invoicesTableBody">
+                    <tr><td colspan="10" class="empty-state">Loading invoices...</td></tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ADD CUSTOMER MODAL -->
+<div id="addCustomerModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('addCustomerModal')">&times;</span>
+        <h2>👤 Add New Customer</h2>
+        <form onsubmit="submitAddCustomer(event)">
+            <div class="form-row">
+                <div class="form-group"><label>Full Name *</label><input type="text" id="custName" required placeholder="Customer name"></div>
+                <div class="form-group"><label>Phone</label><input type="tel" id="custPhone" placeholder="+91 XXXXXXXXXX"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Email</label><input type="email" id="custEmail" placeholder="email@example.com"></div>
+                <div class="form-group"><label>GST Number</label><input type="text" id="custGST" placeholder="Optional"></div>
+            </div>
+            <div class="form-group"><label>Address</label><input type="text" id="custAddress" placeholder="Full address"></div>
+            <button type="submit" class="btn-submit">Add Customer</button>
+        </form>
+    </div>
+</div>
+
+<!-- EDIT CUSTOMER MODAL -->
+<div id="editCustomerModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('editCustomerModal')">&times;</span>
+        <h2>Edit Customer</h2>
+        <input type="hidden" id="editCustId">
+        <form onsubmit="submitEditCustomer(event)">
+            <div class="form-row">
+                <div class="form-group"><label>Full Name *</label><input type="text" id="editCustName" required></div>
+                <div class="form-group"><label>Phone</label><input type="tel" id="editCustPhone"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Email</label><input type="email" id="editCustEmail"></div>
+                <div class="form-group"><label>GST Number</label><input type="text" id="editCustGST"></div>
+            </div>
+            <div class="form-group"><label>Address</label><input type="text" id="editCustAddress"></div>
+            <button type="submit" class="btn-submit">Save Changes</button>
+        </form>
+    </div>
+</div>
+
+<!-- CUSTOMER DETAIL MODAL -->
+<div id="customerDetailModal" class="modal customer-detail-modal">
+    <div class="modal-content" style="max-width:650px">
+        <span class="close" onclick="closeModal('customerDetailModal')">&times;</span>
+        <h2 id="custDetailTitle">Customer Details</h2>
+        <div id="custDetailContent"></div>
+    </div>
+</div>
+
+<script>
+let allCustomers = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadCustomers();
+    loadInvoices();
+    // check hash
+    if(window.location.hash === '#invoices') switchTab('invoices', document.getElementById('invoicesTabBtn'));
+});
+
+function switchTab(tab, btn) {
+    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('tab-'+tab).classList.add('active');
+    if(btn) btn.classList.add('active');
+}
+
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+window.addEventListener('click',e=>{if(e.target.classList.contains('modal'))e.target.classList.remove('show');});
+
+function loadCustomers() {
+    fetch('/api/customers').then(r=>r.json()).then(data=>{
+        if(data.success){
+            allCustomers=data.data;
+            displayCustomers(data.data);
+            populateCustomerFilter(data.data);
+        }
+    });
+}
+
+function populateCustomerFilter(customers) {
+    const sel=document.getElementById('invoiceCustomerFilter');
+    sel.innerHTML='<option value="">All Customers</option>';
+    customers.forEach(c=>{sel.innerHTML+=`<option value="${c.id}">${c.name}</option>`;});
+}
+
+function displayCustomers(customers) {
+    const tbody=document.getElementById('customersTableBody');
+    if(!customers.length){tbody.innerHTML='<tr><td colspan="7" class="empty-state">No customers yet. Add your first customer!</td></tr>';return;}
+    tbody.innerHTML='';
+    customers.forEach((c,i)=>{
+        tbody.innerHTML+=`<tr>
+            <td>${i+1}</td>
+            <td><strong>${c.name}</strong></td>
+            <td>${c.phone||'—'}</td>
+            <td>${c.email||'—'}</td>
+            <td>${c.gst||'—'}</td>
+            <td>${c.address||'—'}</td>
+            <td>
+                <button class="btn btn-sm btn-outline" onclick="viewCustomerDetail(${c.id})">View</button>
+                <button class="btn btn-sm btn-primary" style="margin:0 4px" onclick="openEditCustomer(${c.id})">Edit</button>
+            </td>
+        </tr>`;
+    });
+}
+
+function searchCustomers() {
+    const q=document.getElementById('customerSearch').value.toLowerCase();
+    const filtered=allCustomers.filter(c=>
+        c.name.toLowerCase().includes(q)||
+        (c.phone||'').includes(q)||
+        (c.email||'').toLowerCase().includes(q)
+    );
+    displayCustomers(filtered);
+}
+
+function openAddCustomerModal(){document.getElementById('addCustomerModal').classList.add('show');}
+
+function submitAddCustomer(e) {
+    e.preventDefault();
+    const data={
+        name:document.getElementById('custName').value,
+        phone:document.getElementById('custPhone').value,
+        email:document.getElementById('custEmail').value,
+        gst:document.getElementById('custGST').value,
+        address:document.getElementById('custAddress').value
+    };
+    fetch('/api/customers',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+    .then(r=>r.json()).then(d=>{
+        if(d.success){showMsg('✓ Customer added!',true);closeModal('addCustomerModal');document.querySelector('#addCustomerModal form').reset();loadCustomers();}
+        else showMsg(d.message,false);
+    });
+}
+
+function openEditCustomer(id) {
+    const c=allCustomers.find(c=>c.id===id);
+    if(!c) return;
+    document.getElementById('editCustId').value=id;
+    document.getElementById('editCustName').value=c.name;
+    document.getElementById('editCustPhone').value=c.phone||'';
+    document.getElementById('editCustEmail').value=c.email||'';
+    document.getElementById('editCustGST').value=c.gst||'';
+    document.getElementById('editCustAddress').value=c.address||'';
+    document.getElementById('editCustomerModal').classList.add('show');
+}
+
+function submitEditCustomer(e) {
+    e.preventDefault();
+    const id=document.getElementById('editCustId').value;
+    const data={
+        name:document.getElementById('editCustName').value,
+        phone:document.getElementById('editCustPhone').value,
+        email:document.getElementById('editCustEmail').value,
+        gst:document.getElementById('editCustGST').value,
+        address:document.getElementById('editCustAddress').value
+    };
+    fetch(`/api/customers/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+    .then(r=>r.json()).then(d=>{
+        if(d.success){showMsg('✓ Customer updated!',true);closeModal('editCustomerModal');loadCustomers();}
+        else showMsg(d.message,false);
+    });
+}
+
+function viewCustomerDetail(id) {
+    fetch(`/api/customers/${id}`).then(r=>r.json()).then(d=>{
+        if(!d.success)return;
+        const c=d.data, sales=d.sales||[], totalSpent=d.total_spent||0;
+        document.getElementById('custDetailTitle').textContent='👤 '+c.name;
+        document.getElementById('custDetailContent').innerHTML=`
+            <div style="background:#f5f7fa;border-radius:10px;padding:14px;margin-bottom:16px">
+                <p><strong>Phone:</strong> ${c.phone||'—'}</p>
+                <p><strong>Email:</strong> ${c.email||'—'}</p>
+                <p><strong>Address:</strong> ${c.address||'—'}</p>
+                <p><strong>GST:</strong> ${c.gst||'—'}</p>
+            </div>
+            <div class="stats">
+                <div class="mini-stat"><h4>Purchases</h4><p>${sales.length}</p></div>
+                <div class="mini-stat"><h4>Total Spent</h4><p>₹${(totalSpent/1000).toFixed(1)}K</p></div>
+            </div>
+            <h4 style="margin-bottom:10px;color:#666">Purchase History</h4>
+            <div style="max-height:250px;overflow-y:auto">
+            ${sales.length?sales.slice(-10).reverse().map(s=>`
+                <div style="padding:10px;background:#f5f7fa;border-radius:8px;margin-bottom:8px;border-left:3px solid var(--primary)">
+                    <strong>${s.item_name}</strong> × ${s.quantity}
+                    <span style="float:right;color:var(--primary);font-weight:700">₹${(s.selling_price*s.quantity).toFixed(0)}</span><br>
+                    <small style="color:#888">${s.date.split('T')[0]} · ${s.payment_method||'Cash'}</small>
+                    <a href="/invoice/${s.id}" target="_blank" style="float:right;font-size:0.8em;color:var(--primary)">View Invoice</a>
+                </div>`).join(''):'<p style="color:#999;text-align:center;padding:20px">No purchases yet</p>'}
+            </div>`;
+        document.getElementById('customerDetailModal').classList.add('show');
+    });
+}
+
+function loadInvoices() {
+    const custId=document.getElementById('invoiceCustomerFilter').value;
+    const from=document.getElementById('invoiceDateFrom').value;
+    const to=document.getElementById('invoiceDateTo').value;
+    let url='/api/invoices?';
+    if(custId) url+=`customer_id=${custId}&`;
+    if(from) url+=`from=${from}&`;
+    if(to) url+=`to=${to}&`;
+    fetch(url).then(r=>r.json()).then(data=>{
+        const tbody=document.getElementById('invoicesTableBody');
+        if(!data.success||!data.data.length){tbody.innerHTML='<tr><td colspan="10" class="empty-state">No invoices found</td></tr>';return;}
+        const payClass={'Cash':'pay-cash','UPI':'pay-upi','Card':'pay-card'};
+        tbody.innerHTML='';
+        data.data.forEach(inv=>{
+            const cls=payClass[inv.payment_method]||'pay-other';
+            tbody.innerHTML+=`<tr>
+                <td><span class="invoice-badge">${inv.invoice_number}</span></td>
+                <td>${inv.date.split('T')[0]}</td>
+                <td>${inv.customer_name}</td>
+                <td>${inv.item_name}</td>
+                <td>${inv.quantity}</td>
+                <td><strong>₹${inv.amount.toFixed(2)}</strong></td>
+                <td style="color:#28a745">₹${inv.profit.toFixed(2)}</td>
+                <td><span class="payment-badge ${cls}">${inv.payment_method}</span></td>
+                <td>${inv.recorded_by}</td>
+                <td><a href="/invoice/${inv.sale_id}" target="_blank" class="btn btn-sm btn-outline">View</a></td>
+            </tr>`;
+        });
+    });
+}
+
+function clearInvoiceFilters(){
+    document.getElementById('invoiceCustomerFilter').value='';
+    document.getElementById('invoiceDateFrom').value='';
+    document.getElementById('invoiceDateTo').value='';
+    loadInvoices();
+}
+
+function showMsg(msg,success){
+    const d=document.createElement('div');d.className=success?'success-msg':'error-msg';d.textContent=msg;
+    d.style.cssText='position:fixed;top:20px;right:20px;z-index:5000;min-width:280px;';
+    document.body.appendChild(d);setTimeout(()=>d.remove(),3500);
+}
+</script>
+</body>
+</html>

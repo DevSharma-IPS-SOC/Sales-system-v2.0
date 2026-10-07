@@ -1,0 +1,285 @@
+{
+    "logs": [
+        {
+            "id": 1,
+            "user": "Admin",
+            "role": "admin",
+            "action": "LOGIN",
+            "details": "User logged in",
+            "item_info": "",
+            "timestamp": "2026-04-22T13:13:32.082609",
+            "date": "2026-04-22 13:13:32"
+        },
+        {
+            "id": 2,
+            "user": "Admin",
+            "role": "admin",
+            "action": "ADD_USER",
+            "details": "Created user: SalesMan",
+            "item_info": "Role: salesperson",
+            "timestamp": "2026-04-22T13:14:25.147688",
+            "date": "2026-04-22 13:14:25"
+        },
+        {
+            "id": 3,
+            "user": "Admin",
+            "role": "admin",
+            "action": "LOGOUT",
+            "details": "User logged out",
+            "item_info": "",
+            "timestamp": "2026-04-22T13:14:29.398215",
+            "date": "2026-04-22 13:14:29"
+        },
+        {
+            "id": 4,
+            "user": "SalesMan",
+            "role": "salesperson",
+            "action": "LOGIN",
+            "details": "User logged in",
+            "item_info": "",
+            "timestamp": "2026-04-22T13:14:33.943668",
+            "date": "2026-04-22 13:14:33"
+        },
+        {
+            "id": 5,
+            "user": "SalesMan",
+            "role": "salesperson",
+            "action": "ADD_CUSTOMER",
+            "details": "Added customer: dev sharma",
+            "item_info": "Phone: +917880060373",
+            "timestamp": "2026-04-22T13:14:59.142901",
+            "date": "2026-04-22 13:14:59"
+        },
+        {
+            "id": 6,
+            "user": "SalesMan",
+            "role": "salesperson",
+            "action": "LOGOUT",
+            "details": "User logged out",
+            "item_info": "",
+            "timestamp": "2026-04-22T13:17:48.441084",
+            "date": "2026-04-22 13:17:48"
+        },
+        {
+            "id": 7,
+            "user": "Admin",
+            "role": "admin",
+            "action": "LOGIN",
+            "details": "User logged in",
+            "item_info": "",
+            "timestamp": "2026-04-22T13:17:51.455433",
+            "date": "2026-04-22 13:17:51"
+        },
+        {
+            "id": 8,
+            "user": "Admin",
+            "role": "admin",
+            "action": "ADD_ITEM",
+            "details": "Added item: Laptop",
+            "item_info": "ID: A01, Qty: 10, Price: ₹59999",
+            "timestamp": "2026-04-22T13:18:13.867346",
+            "date": "2026-04-22 13:18:13"
+        },
+        {
+            "id": 9,
+            "user": "Admin",
+            "role": "admin",
+            "action": "ADD_ITEM",
+            "details": "Added item: HP 001 Keyboard",
+            "item_info": "ID: A02, Qty: 5, Price: ₹2599",
+            "timestamp": "2026-04-22T13:18:47.046433",
+            "date": "2026-04-22 13:18:47"
+        },
+        {
+            "id": 10,
+            "user": "Admin",
+            "role": "admin",
+            "action": "LOGOUT",
+            "details": "User logged out",
+            "item_info": "",
+            "timestamp": "2026-04-22T13:18:49.661970",
+            "date": "2026-04-22 13:18:49"
+        },
+        {
+            "id": 11,
+            "user": "SalesMan",
+            "role": "salesperson",
+            "action": "LOGIN",
+            "details": "User logged in",
+            "item_info": "",
+            "timestamp": "2026-04-22T13:18:52.371788",
+            "date": "2026-04-22 13:18:52"
+        },
+        {
+            "id": 12,
+            "user": "SalesMan",
+            "role": "salesperson",
+            "action": "SALE",
+            "details": "Sold 1x Laptop to Ashok",
+            "item_info": "Sale ID: 1, Revenue: ₹69999.00, Profit: ₹10000.00",
+            "timestamp": "2026-04-22T13:19:57.293937",
+            "date": "2026-04-22 13:19:57"
+        },
+        {
+            "id": 13,
+            "user": "SalesMan",
+            "role": "salesperson",
+            "action": "LOGOUT",
+            "details": "User logged out",
+            "item_info": "",
+            "timestamp": "2026-04-22T13:23:27.925830",
+            "date": "2026-04-22 13:23:27"
+        },
+        {
+            "id": 14,
+            "user": "Admin",
+            "role": "admin",
+            "action": "LOGIN",
+            "details": "User logged in",
+            "item_info": "",
+            "timestamp": "2026-04-22T13:23:31.048627",
+            "date": "2026-04-22 13:23:31"
+        },
+        {
+            "id": 15,
+            "user": "Admin",
+            "role": "admin",
+            "action": "LOGIN",
+            "details": "User logged in",
+            "item_info": "",
+            "timestamp": "2026-04-22T13:27:41.880365",
+            "date": "2026-04-22 13:27:41"
+        },
+        {
+            "id": 16,
+            "user": "Admin",
+            "role": "admin",
+            "action": "LOGOUT",
+            "details": "User logged out",
+            "item_info": "",
+            "timestamp": "2026-04-22T13:28:46.021598",
+            "date": "2026-04-22 13:28:46"
+        },
+        {
+            "id": 17,
+            "user": "SalesMan",
+            "role": "salesperson",
+            "action": "LOGIN",
+            "details": "User logged in",
+            "item_info": "",
+            "timestamp": "2026-04-22T13:28:51.401646",
+            "date": "2026-04-22 13:28:51"
+        },
+        {
+            "id": 18,
+            "user": "SalesMan",
+            "role": "salesperson",
+            "action": "SALE",
+            "details": "Sold 1x Lenovo ThinkPad E15 to Ashok",
+            "item_info": "Sale ID: 12, Revenue: ₹75400.00, Profit: ₹9900.00",
+            "timestamp": "2026-04-22T13:30:25.848961",
+            "date": "2026-04-22 13:30:25"
+        },
+        {
+            "id": 19,
+            "user": "SalesMan",
+            "role": "salesperson",
+            "action": "UPDATE_CUSTOMER",
+            "details": "Updated customer: dev sharma",
+            "item_info": "",
+            "timestamp": "2026-04-22T13:45:32.746709",
+            "date": "2026-04-22 13:45:32"
+        },
+        {
+            "id": 20,
+            "user": "SalesMan",
+            "role": "salesperson",
+            "action": "SALE",
+            "details": "Sold 1x WD Blue 1TB HDD to Rajesh",
+            "item_info": "Sale ID: 21, Revenue: ₹4500.00, Profit: ₹940.00",
+            "timestamp": "2026-04-22T13:55:10.437258",
+            "date": "2026-04-22 13:55:10"
+        },
+        {
+            "id": 21,
+            "user": "SalesMan",
+            "role": "salesperson",
+            "action": "LOGOUT",
+            "details": "User logged out",
+            "item_info": "",
+            "timestamp": "2026-04-22T13:56:20.358137",
+            "date": "2026-04-22 13:56:20"
+        },
+        {
+            "id": 22,
+            "user": "Admin",
+            "role": "admin",
+            "action": "LOGIN",
+            "details": "User logged in",
+            "item_info": "",
+            "timestamp": "2026-04-22T13:56:23.756534",
+            "date": "2026-04-22 13:56:23"
+        },
+        {
+            "id": 23,
+            "user": "Admin",
+            "role": "admin",
+            "action": "LOGOUT",
+            "details": "User logged out",
+            "item_info": "",
+            "timestamp": "2026-04-22T13:57:27.811686",
+            "date": "2026-04-22 13:57:27"
+        },
+        {
+            "id": 24,
+            "user": "SalesMan",
+            "role": "salesperson",
+            "action": "LOGIN",
+            "details": "User logged in",
+            "item_info": "",
+            "timestamp": "2026-04-22T13:57:30.871250",
+            "date": "2026-04-22 13:57:30"
+        },
+        {
+            "id": 25,
+            "user": "SalesMan",
+            "role": "salesperson",
+            "action": "LOGOUT",
+            "details": "User logged out",
+            "item_info": "",
+            "timestamp": "2026-04-22T13:58:31.895778",
+            "date": "2026-04-22 13:58:31"
+        },
+        {
+            "id": 26,
+            "user": "Admin",
+            "role": "admin",
+            "action": "LOGIN",
+            "details": "User logged in",
+            "item_info": "",
+            "timestamp": "2026-04-22T13:58:34.500832",
+            "date": "2026-04-22 13:58:34"
+        },
+        {
+            "id": 27,
+            "user": "Admin",
+            "role": "admin",
+            "action": "LOGOUT",
+            "details": "User logged out",
+            "item_info": "",
+            "timestamp": "2026-04-22T14:01:36.216214",
+            "date": "2026-04-22 14:01:36"
+        },
+        {
+            "id": 28,
+            "user": "Admin",
+            "role": "admin",
+            "action": "LOGIN",
+            "details": "User logged in",
+            "item_info": "",
+            "timestamp": "2026-04-22T14:04:34.689740",
+            "date": "2026-04-22 14:04:34"
+        }
+    ],
+    "last_id": 28
+}

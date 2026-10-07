@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <style>
+        :root { --primary:#2c8cfb; --dark:#1a2035; --white:#fff; --border:#e0e0e0; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI',sans-serif; background:#f0f2f5; padding:20px; color:#333; }
+        .page-actions { display:flex; gap:12px; justify-content:center; margin-bottom:20px; }
+        .btn { padding:10px 24px; border:none; border-radius:8px; font-weight:600; cursor:pointer; font-size:0.95em; transition:all 0.3s; }
+        .btn-print { background:var(--primary); color:var(--white); }
+        .btn-back { background:#6c757d; color:var(--white); }
+        .btn:hover { transform:translateY(-2px); }
+        .invoice-wrapper { max-width:800px; margin:0 auto; background:var(--white); border-radius:12px; overflow:hidden; box-shadow:0 8px 32px rgba(0,0,0,0.1); }
+        .invoice-header { background:linear-gradient(135deg,var(--dark) 0%,#2c3e6b 100%); color:var(--white); padding:32px 40px; display:flex; justify-content:space-between; align-items:flex-start; }
+        .store-info h1 { font-size:1.8em; font-weight:700; margin-bottom:6px; }
+        .store-info p { opacity:0.8; font-size:0.9em; line-height:1.6; }
+        .invoice-meta { text-align:right; }
+        .invoice-meta .inv-number { font-size:1.6em; font-weight:700; color:#5cacfa; }
+        .invoice-meta p { opacity:0.85; font-size:0.88em; margin-top:4px; }
+
+        .invoice-body { padding:32px 40px; }
+        .bill-parties { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:28px; }
+        .party-box { background:#f8f9fc; border-radius:10px; padding:18px; border-left:4px solid var(--primary); }
+        .party-box h4 { color:#888; font-size:0.78em; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+        .party-box .party-name { font-size:1.05em; font-weight:700; color:var(--dark); margin-bottom:4px; }
+        .party-box p { color:#666; font-size:0.88em; line-height:1.7; }
+
+        .items-table { width:100%; border-collapse:collapse; margin-bottom:24px; }
+        .items-table thead { background:var(--primary); color:var(--white); }
+        .items-table thead th { padding:12px 16px; text-align:left; font-size:0.85em; font-weight:600; }
+        .items-table thead th:last-child { text-align:right; }
+        .items-table tbody tr { border-bottom:1px solid #f0f0f0; }
+        .items-table tbody tr:last-child { border-bottom:2px solid var(--border); }
+        .items-table tbody td { padding:14px 16px; font-size:0.92em; color:#444; }
+        .items-table tbody td:last-child { text-align:right; font-weight:600; }
+
+        .totals { display:flex; justify-content:flex-end; margin-bottom:24px; }
+        .totals-box { width:280px; }
+        .totals-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0f0f0; font-size:0.92em; }
+        .totals-row:last-child { border-bottom:none; font-size:1.1em; font-weight:700; color:var(--primary); padding-top:12px; }
+        .totals-row .label { color:#666; }
+
+        .payment-info { display:flex; justify-content:space-between; align-items:center; background:#f0f7ff; border-radius:10px; padding:16px 20px; margin-bottom:24px; }
+        .payment-info .method { font-weight:700; color:var(--primary); font-size:1em; }
+        .payment-info .recorded { font-size:0.85em; color:#888; }
+        .status-badge { background:#e8f5e9; color:#2e7d32; padding:6px 16px; border-radius:20px; font-weight:700; font-size:0.88em; }
+
+        .invoice-footer { background:#f8f9fc; border-top:1px solid var(--border); padding:20px 40px; text-align:center; color:#888; font-size:0.85em; line-height:1.7; }
+        .notes-box { background:#fffde7; border-radius:8px; padding:14px; margin-bottom:18px; border-left:3px solid #f0ad4e; font-size:0.9em; }
+
+        @media print {
+            body { background:var(--white); padding:0; }
+            .page-actions { display:none; }
+            .invoice-wrapper { box-shadow:none; border-radius:0; }
+        }
+        @media(max-width:600px) { .bill-parties { grid-template-columns:1fr; } .invoice-header { flex-direction:column; gap:16px; } .invoice-meta { text-align:left; } }
+        .loading-state { text-align:center; padding:60px; color:#999; }
+    </style>
+</head>
+<body>
+    <div class="page-actions" id="pageActions">
+        <button class="btn btn-back" onclick="window.close()">← Back</button>
+        <button class="btn btn-print" onclick="window.print()">Print Invoice</button>
+    </div>
+
+    <div class="invoice-wrapper" id="invoiceWrapper">
+        <div class="loading-state">Loading invoice...</div>
+    </div>
+
+<script>
+    
+const saleId = {{ sale_id }};
+
+fetch(`/api/invoice/${saleId}`).then(r=>r.json()).then(data=>{
+    if(!data.success){ document.getElementById('invoiceWrapper').innerHTML='<div class="loading-state">Invoice not found.</div>'; return; }
+    const inv=data.data, sale=inv.sale, customer=inv.customer;
+    const amount=(sale.selling_price*sale.quantity).toFixed(2);
+    const tax=0; // Can be extended
+    const total=parseFloat(amount)+tax;
+    const date=new Date(sale.date).toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+    const time=new Date(sale.date).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+
+    document.getElementById('invoiceWrapper').innerHTML=`
+        <div class="invoice-header">
+            <div class="store-info">
+                <h1>${inv.store_name}</h1>
+                <p>${inv.store_address}<br>${inv.store_phone}<br>${inv.store_gst}</p>
+            </div>
+            <div class="invoice-meta">
+                <div class="inv-number">${inv.invoice_number}</div>
+                <p>Date: ${date}</p>
+                <p>Time: ${time}</p>
+            </div>
+        </div>
+
+        <div class="invoice-body">
+            <div class="bill-parties">
+                <div class="party-box">
+                    <h4>Bill To</h4>
+                    <div class="party-name">${sale.customer_name||'Walk-in Customer'}</div>
+                    ${sale.customer_phone?`<p>${sale.customer_phone}</p>`:''}
+                    ${customer&&customer.email?`<p>${customer.email}</p>`:''}
+                    ${customer&&customer.address?`<p>${customer.address}</p>`:''}
+                    ${customer&&customer.gst?`<p>GST: ${customer.gst}</p>`:''}
+                </div>
+                <div class="party-box">
+                    <h4>Invoice Details</h4>
+                    <p><strong>Invoice No:</strong> ${inv.invoice_number}</p>
+                    <p><strong>Date:</strong> ${date}</p>
+                    <p><strong>Processed by:</strong> ${sale.recorded_by||'—'}</p>
+                    ${sale.notes?`<p><strong>Notes:</strong> ${sale.notes}</p>`:''}
+                </div>
+            </div>
+
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>#</th><th>Item Description</th><th>Category</th>
+                        <th style="text-align:center">Qty</th>
+                        <th style="text-align:right">Unit Price</th>
+                        <th style="text-align:right">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td><strong>${sale.item_name}</strong><br><small style="color:#888">ID: ${sale.unique_item_id||sale.item_id}</small></td>
+                        <td>${sale.category||'General'}</td>
+                        <td style="text-align:center">${sale.quantity}</td>
+                        <td style="text-align:right">₹${parseFloat(sale.selling_price).toFixed(2)}</td>
+                        <td style="text-align:right">₹${amount}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="totals">
+                <div class="totals-box">
+                    <div class="totals-row"><span class="label">Subtotal</span><span>₹${amount}</span></div>
+                    <div class="totals-row"><span class="label">Tax (0%)</span><span>₹0.00</span></div>
+                    <div class="totals-row"><span class="label">TOTAL AMOUNT</span><span>₹${total.toFixed(2)}</span></div>
+                </div>
+            </div>
+
+            <div class="payment-info">
+                <div>
+                    <div style="font-size:0.8em;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px">Payment Method</div>
+                    <div class="method">${sale.payment_method||'Cash'}</div>
+                </div>
+                <div>
+                    <span class="status-badge">✓ PAID</span>
+                </div>
+                <div class="recorded">Recorded by: ${sale.recorded_by||'—'}</div>
+            </div>
+
+            ${sale.notes?`<div class="notes-box"><strong>Notes:</strong> ${sale.notes}</div>`:''}
+        </div>
+
+        <div class="invoice-footer">
+            <p>Thank you for your purchase! </p>
+            <p>For queries, contact us at ${inv.store_phone}</p>
+            <p style="margin-top:8px;font-size:0.8em;opacity:0.7">This is a computer-generated invoice • ${inv.store_name}</p>
+        </div>
+    `;
+});
+</script>
+</body>
+</html>

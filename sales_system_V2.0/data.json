@@ -1,0 +1,205 @@
+{
+    "items": [
+        {
+            "id": 1,
+            "unique_id": "A01",
+            "name": "Lenovo ThinkPad E15",
+            "category": "Laptop",
+            "quantity": 1,
+            "location": "Main Shelf",
+            "supplier": "Lenovo",
+            "price": 65500.0
+        },
+        {
+            "id": 2,
+            "unique_id": "A02",
+            "name": "HP Pavilion 14",
+            "category": "Laptop",
+            "quantity": 8,
+            "location": "Main Shelf",
+            "supplier": "HP",
+            "price": 58999.0
+        },
+        {
+            "id": 3,
+            "unique_id": "A03",
+            "name": "Dell Inspiron 15",
+            "category": "Laptop",
+            "quantity": 3,
+            "location": "Laptop Rack",
+            "supplier": "Dell",
+            "price": 61000.0
+        },
+        {
+            "id": 4,
+            "unique_id": "A04",
+            "name": "Apple MacBook Air M2",
+            "category": "Laptop",
+            "quantity": 4,
+            "location": "Premium Display",
+            "supplier": "Apple",
+            "price": 99500.0
+        },
+        {
+            "id": 5,
+            "unique_id": "A05",
+            "name": "Acer Aspire 7",
+            "category": "Laptop",
+            "quantity": 3,
+            "location": "Laptop Rack",
+            "supplier": "Acer",
+            "price": 53000.0
+        },
+        {
+            "id": 6,
+            "unique_id": "A06",
+            "name": "MSI Gaming GF63",
+            "category": "Laptop",
+            "quantity": 1,
+            "location": "Gaming Zone",
+            "supplier": "MSI",
+            "price": 78000
+        },
+        {
+            "id": 7,
+            "unique_id": "A07",
+            "name": "Samsung 24\" LED Monitor",
+            "category": "Monitor",
+            "quantity": 8,
+            "location": "Monitor Shelf",
+            "supplier": "Samsung",
+            "price": 12499
+        },
+        {
+            "id": 8,
+            "unique_id": "A08",
+            "name": "Dell UltraSharp 27\" Monitor",
+            "category": "Monitor",
+            "quantity": 6,
+            "location": "Monitor Shelf",
+            "supplier": "Dell",
+            "price": 23500.0
+        },
+        {
+            "id": 9,
+            "unique_id": "A09",
+            "name": "Logitech Wireless Mouse M235",
+            "category": "Accessory",
+            "quantity": 25,
+            "location": "Accessories",
+            "supplier": "Logitech",
+            "price": 699.0
+        },
+        {
+            "id": 10,
+            "unique_id": "A10",
+            "name": "HP K200 Wired Keyboard",
+            "category": "Accessory",
+            "quantity": 5,
+            "location": "Accessories",
+            "supplier": "HP",
+            "price": 780
+        },
+        {
+            "id": 11,
+            "unique_id": "B01",
+            "name": "Crucial DDR4 8GB RAM Stick",
+            "category": "Component",
+            "quantity": 14,
+            "location": "Parts Rack",
+            "supplier": "Crucial",
+            "price": 2250.0
+        },
+        {
+            "id": 12,
+            "unique_id": "B02",
+            "name": "WD Blue 1TB HDD",
+            "category": "Component",
+            "quantity": 10,
+            "location": "Parts Rack",
+            "supplier": "Western Digital",
+            "price": 3560.0
+        },
+        {
+            "id": 13,
+            "unique_id": "B03",
+            "name": "Samsung 256GB SSD",
+            "category": "Component",
+            "quantity": 9,
+            "location": "Parts Rack",
+            "supplier": "Samsung",
+            "price": 3350.0
+        },
+        {
+            "id": 14,
+            "unique_id": "B04",
+            "name": "Asus Motherboard B450",
+            "category": "Component",
+            "quantity": 5,
+            "location": "Parts Shelf",
+            "supplier": "Asus",
+            "price": 7200.0
+        },
+        {
+            "id": 15,
+            "unique_id": "B05",
+            "name": "Intel Core i5 Processor 12400",
+            "category": "Component",
+            "quantity": 6,
+            "location": "Parts Shelf",
+            "supplier": "Intel",
+            "price": 14999.0
+        },
+        {
+            "id": 16,
+            "unique_id": "B06",
+            "name": "Sony External DVD Writer",
+            "category": "Accessory",
+            "quantity": 3,
+            "location": "Accessories",
+            "supplier": "Sony",
+            "price": 1899.0
+        },
+        {
+            "id": 17,
+            "unique_id": "B07",
+            "name": "Lenovo Original Backpack",
+            "category": "Accessory",
+            "quantity": 16,
+            "location": "Accessories",
+            "supplier": "Lenovo",
+            "price": 1100.0
+        },
+        {
+            "id": 18,
+            "unique_id": "B08",
+            "name": "Zebronics Power Adapter 65W",
+            "category": "Accessory",
+            "quantity": 19,
+            "location": "Accessories",
+            "supplier": "Zebronics",
+            "price": 1050.0
+        },
+        {
+            "id": 19,
+            "unique_id": "B09",
+            "name": "TP-Link USB WiFi Adapter",
+            "category": "Accessory",
+            "quantity": 22,
+            "location": "Accessories",
+            "supplier": "TP-Link",
+            "price": 850.0
+        },
+        {
+            "id": 20,
+            "unique_id": "B10",
+            "name": "Cooler Master Laptop Cooling Pad",
+            "category": "Accessory",
+            "quantity": 10,
+            "location": "Accessories",
+            "supplier": "Cooler Master",
+            "price": 1259.0
+        }
+    ],
+    "last_id": 20
+}

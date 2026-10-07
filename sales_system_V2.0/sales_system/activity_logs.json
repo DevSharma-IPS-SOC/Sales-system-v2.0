@@ -1,0 +1,15 @@
+{
+    "logs": [
+        {
+            "id": 1,
+            "user": "Admin",
+            "role": "admin",
+            "action": "LOGIN",
+            "details": "User logged in",
+            "item_info": "",
+            "timestamp": "2026-04-22T07:41:22.466396",
+            "date": "2026-04-22 07:41:22"
+        }
+    ],
+    "last_id": 1
+}

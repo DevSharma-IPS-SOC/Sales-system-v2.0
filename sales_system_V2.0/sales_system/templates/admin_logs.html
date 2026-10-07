@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Logs</title>
+    <style>
+        :root { --primary:#2c8cfb; --primary-light:#5cacfa; --primary-dark:#1a5fb4; --white:#fff; --gray-dark:#2d3748; --border:#e2e8f0; --danger:#e74c3c; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI',sans-serif; background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%); min-height:100vh; color:var(--gray-dark); }
+        .navbar { background:var(--white); box-shadow:0 2px 8px rgba(44,140,251,0.1); padding:0 25px; display:flex; justify-content:space-between; align-items:center; height:60px; }
+        .navbar-logo { font-size:1.4em; font-weight:700; color:var(--primary); }
+        .navbar-links { display:flex; gap:5px; align-items:center; }
+        .navbar-link { color:var(--gray-dark); text-decoration:none; font-weight:600; padding:7px 14px; border-radius:6px; transition:all 0.3s; font-size:0.9em; cursor:pointer; }
+        .navbar-link:hover,.navbar-link.active { background:var(--primary); color:var(--white); }
+        .navbar-link.logout { background:var(--danger); color:var(--white); }
+        .container { max-width:1400px; margin:25px auto; padding:0 20px; }
+        .page-title { text-align:center; color:var(--white); margin-bottom:20px; font-size:1.8em; }
+        .card { background:var(--white); border-radius:12px; padding:22px; box-shadow:0 4px 12px rgba(44,140,251,0.1); }
+        .filter-row { display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap; align-items:center; }
+        .filter-row select, .filter-row input { padding:9px 12px; border:2px solid var(--border); border-radius:8px; font-size:0.9em; }
+        .filter-row select:focus, .filter-row input:focus { outline:none; border-color:var(--primary); }
+        table { width:100%; border-collapse:collapse; }
+        thead { background:linear-gradient(90deg,var(--primary),var(--primary-light)); color:var(--white); }
+        thead th { padding:12px 14px; text-align:left; font-weight:600; font-size:0.82em; text-transform:uppercase; }
+        tbody tr { border-bottom:1px solid var(--border); transition:background 0.2s; }
+        tbody tr:hover { background:rgba(92,172,250,0.05); }
+        tbody td { padding:10px 14px; font-size:0.88em; }
+        .action-badge { font-size:0.75em; padding:3px 9px; border-radius:10px; font-weight:700; white-space:nowrap; }
+        .act-login { background:#e3f2fd; color:#1565c0; }
+        .act-logout { background:#f3e5f5; color:#6a1b9a; }
+        .act-add { background:#e8f5e9; color:#2e7d32; }
+        .act-update { background:#fff3e0; color:#e65100; }
+        .act-delete { background:#ffebee; color:#c62828; }
+        .act-sale { background:#e0f2f1; color:#00695c; }
+        .act-other { background:#f5f5f5; color:#424242; }
+        .role-badge { font-size:0.75em; padding:2px 8px; border-radius:10px; font-weight:600; }
+        .role-admin { background:#fff3e0; color:#e65100; }
+        .role-salesperson { background:#e3f2fd; color:#1565c0; }
+        .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:14px; margin-bottom:20px; }
+        .stat-mini { background:var(--white); border-radius:10px; padding:14px 16px; text-align:center; box-shadow:0 4px 12px rgba(44,140,251,0.1); border-left:3px solid var(--primary); }
+        .stat-mini h4 { font-size:0.75em; color:#888; text-transform:uppercase; margin-bottom:6px; }
+        .stat-mini p { font-size:1.4em; font-weight:700; color:var(--primary); }
+        .empty-state { text-align:center; padding:40px; color:#999; }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="navbar-logo">Sales Analysis</div>
+    <div class="navbar-links">
+        <a href="/dashboard" class="navbar-link">Dashboard</a>
+        <a href="/analytics" class="navbar-link">Analytics</a>
+        <a href="/admin/users" class="navbar-link">Users</a>
+        <a href="/admin/logs" class="navbar-link active">Activity Logs</a>
+        <a href="/logout" class="navbar-link logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <h1 class="page-title">Activity Logs</h1>
+
+    <div class="stats-row" id="logsStats"></div>
+
+    <div class="card">
+        <div class="filter-row">
+            <select id="filterUser" onchange="filterLogs()"><option value="">All Users</option></select>
+            <select id="filterAction" onchange="filterLogs()">
+                <option value="">All Actions</option>
+                <option value="LOGIN">Logins</option>
+                <option value="LOGOUT">Logouts</option>
+                <option value="SALE">Sales</option>
+                <option value="ADD_ITEM">Item Added</option>
+                <option value="UPDATE_ITEM">Item Updated</option>
+                <option value="DELETE_ITEM">Item Deleted</option>
+                <option value="ADD_CUSTOMER">Customer Added</option>
+                <option value="ADD_USER">User Created</option>
+            </select>
+            <input type="date" id="filterDate" onchange="filterLogs()" placeholder="Filter by date">
+            <button onclick="clearFilters()" style="padding:9px 16px;background:#6c757d;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">Clear</button>
+        </div>
+        <div style="overflow-x:auto">
+        <table>
+            <thead>
+                <tr><th>#</th><th>Timestamp</th><th>User</th><th>Role</th><th>Action</th><th>Details</th><th>Item Info</th></tr>
+            </thead>
+            <tbody id="logsTableBody">
+                <tr><td colspan="7" class="empty-state">Loading logs...</td></tr>
+            </tbody>
+        </table>
+        </div>
+    </div>
+</div>
+
+<script>
+let allLogs = [];
+
+document.addEventListener('DOMContentLoaded', loadLogs);
+
+function loadLogs() {
+    fetch('/api/logs').then(r=>r.json()).then(data=>{
+        if(!data.success) return;
+        allLogs=data.data;
+        buildUserFilter(data.data);
+        buildStats(data.data);
+        renderLogs(data.data);
+    });
+}
+
+function buildUserFilter(logs) {
+    const users=[...new Set(logs.map(l=>l.user))].sort();
+    const sel=document.getElementById('filterUser');
+    users.forEach(u=>sel.innerHTML+=`<option value="${u}">${u}</option>`);
+}
+
+function buildStats(logs) {
+    const stats={logins:0,sales:0,items_added:0,items_deleted:0};
+    logs.forEach(l=>{
+        if(l.action==='LOGIN')stats.logins++;
+        if(l.action==='SALE')stats.sales++;
+        if(l.action==='ADD_ITEM')stats.items_added++;
+        if(l.action==='DELETE_ITEM')stats.items_deleted++;
+    });
+    document.getElementById('logsStats').innerHTML=`
+        <div class="stat-mini"><h4>Total Logs</h4><p>${logs.length}</p></div>
+        <div class="stat-mini"><h4>Logins</h4><p>${stats.logins}</p></div>
+        <div class="stat-mini"><h4>Sales</h4><p>${stats.sales}</p></div>
+        <div class="stat-mini"><h4>Items Added</h4><p>${stats.items_added}</p></div>
+        <div class="stat-mini"><h4>Items Deleted</h4><p style="color:#e74c3c">${stats.items_deleted}</p></div>`;
+}
+
+function filterLogs() {
+    const user=document.getElementById('filterUser').value;
+    const action=document.getElementById('filterAction').value;
+    const date=document.getElementById('filterDate').value;
+    let filtered=allLogs;
+    if(user) filtered=filtered.filter(l=>l.user===user);
+    if(action) filtered=filtered.filter(l=>l.action.includes(action));
+    if(date) filtered=filtered.filter(l=>l.timestamp.startsWith(date));
+    renderLogs(filtered);
+}
+
+function clearFilters(){
+    document.getElementById('filterUser').value='';
+    document.getElementById('filterAction').value='';
+    document.getElementById('filterDate').value='';
+    renderLogs(allLogs);
+}
+
+function getActionClass(action) {
+    if(action==='LOGIN') return 'act-login';
+    if(action==='LOGOUT') return 'act-logout';
+    if(action.includes('ADD')) return 'act-add';
+    if(action.includes('UPDATE')) return 'act-update';
+    if(action.includes('DELETE')) return 'act-delete';
+    if(action==='SALE') return 'act-sale';
+    return 'act-other';
+}
+
+function getActionEmoji(action) {
+    const map={'LOGIN':'🔑','LOGOUT':'🔒','SALE':'💰','ADD_ITEM':'➕','UPDATE_ITEM':'✏️','DELETE_ITEM':'🗑️','ADD_CUSTOMER':'👤','UPDATE_CUSTOMER':'✏️','ADD_USER':'👥','UPDATE_USER':'✏️','DELETE_USER':'❌'};
+    return map[action]||'📝';
+}
+
+function renderLogs(logs) {
+    const tbody=document.getElementById('logsTableBody');
+    if(!logs.length){tbody.innerHTML='<tr><td colspan="7" class="empty-state">No logs found</td></tr>';return;}
+    tbody.innerHTML='';
+    logs.forEach((l,i)=>{
+        const dt=new Date(l.timestamp);
+        const dateStr=dt.toLocaleDateString('en-IN');
+        const timeStr=dt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+        const roleClass=l.role==='admin'?'role-admin':'role-salesperson';
+        tbody.innerHTML+=`<tr>
+            <td style="color:#888">${i+1}</td>
+            <td><strong style="font-size:0.85em">${dateStr}</strong><br><span style="color:#888;font-size:0.8em">${timeStr}</span></td>
+            <td><strong>${l.user}</strong></td>
+            <td><span class="role-badge ${roleClass}">${l.role}</span></td>
+            <td><span class="action-badge ${getActionClass(l.action)}">${getActionEmoji(l.action)} ${l.action.replace(/_/g,' ')}</span></td>
+            <td style="max-width:220px;word-wrap:break-word">${l.details||'—'}</td>
+            <td style="color:#888;font-size:0.85em">${l.item_info||'—'}</td>
+        </tr>`;
+    });
+}
+</script>
+</body>
+</html>

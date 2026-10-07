@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <style>
+        :root { --primary:#2c8cfb; --primary-light:#5cacfa; --primary-dark:#1a5fb4; --white:#fff; --gray-dark:#2d3748; --border:#e2e8f0; --success:#28a745; --danger:#e74c3c; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI',sans-serif; background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%); min-height:100vh; color:var(--gray-dark); }
+        .navbar { background:var(--white); box-shadow:0 2px 8px rgba(44,140,251,0.1); padding:0 25px; display:flex; justify-content:space-between; align-items:center; height:60px; }
+        .navbar-logo { font-size:1.4em; font-weight:700; color:var(--primary); }
+        .navbar-links { display:flex; gap:5px; align-items:center; }
+        .navbar-link { color:var(--gray-dark); text-decoration:none; font-weight:600; padding:7px 14px; border-radius:6px; transition:all 0.3s; font-size:0.9em; cursor:pointer; }
+        .navbar-link:hover,.navbar-link.active { background:var(--primary); color:var(--white); }
+        .navbar-link.logout { background:var(--danger); color:var(--white); }
+        .container { max-width:1200px; margin:25px auto; padding:0 20px; }
+        .page-title { text-align:center; color:var(--white); margin-bottom:20px; font-size:1.8em; }
+        .card { background:var(--white); border-radius:12px; padding:22px; box-shadow:0 4px 12px rgba(44,140,251,0.1); margin-bottom:22px; }
+        .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+        .card-header h2 { color:var(--primary); font-size:1.2em; }
+        table { width:100%; border-collapse:collapse; }
+        thead { background:linear-gradient(90deg,var(--primary),var(--primary-light)); color:var(--white); }
+        thead th { padding:12px 14px; text-align:left; font-weight:600; font-size:0.82em; text-transform:uppercase; }
+        tbody tr { border-bottom:1px solid var(--border); transition:background 0.2s; }
+        tbody tr:hover { background:rgba(92,172,250,0.05); }
+        tbody td { padding:12px 14px; font-size:0.92em; }
+        .btn { padding:8px 16px; border:none; border-radius:7px; font-weight:600; cursor:pointer; transition:all 0.3s; font-size:0.88em; }
+        .btn:hover { transform:translateY(-1px); }
+        .btn-primary { background:var(--primary); color:var(--white); }
+        .btn-danger { background:var(--danger); color:var(--white); }
+        .btn-sm { padding:5px 11px; font-size:0.8em; }
+        .btn-warning { background:#f0ad4e; color:var(--white); }
+        .role-badge { font-size:0.78em; padding:3px 10px; border-radius:12px; font-weight:700; }
+        .role-admin { background:#fff3e0; color:#e65100; }
+        .role-salesperson { background:#e3f2fd; color:#1565c0; }
+        .status-active { color:#28a745; font-weight:600; }
+        .status-inactive { color:#e74c3c; font-weight:600; }
+        .modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.7); }
+        .modal.show { display:flex; justify-content:center; align-items:center; animation:fadeIn 0.3s; }
+        .modal-content { background:var(--white); padding:30px; border-radius:16px; width:90%; max-width:480px; box-shadow:0 20px 60px rgba(0,0,0,0.3); animation:slideDown 0.3s; position:relative; }
+        .modal-content h2 { color:var(--white); background:linear-gradient(135deg,var(--primary),var(--primary-light)); padding:15px; margin:-30px -30px 20px -30px; border-radius:15px 15px 0 0; font-size:1.15em; }
+        .close { color:var(--white); position:absolute; right:22px; top:17px; font-size:28px; cursor:pointer; }
+        .form-group { display:flex; flex-direction:column; margin-bottom:14px; }
+        .form-group label { font-weight:600; margin-bottom:6px; font-size:0.9em; }
+        .form-group input, .form-group select { padding:10px 12px; border:2px solid var(--border); border-radius:8px; font-size:0.95em; }
+        .form-group input:focus, .form-group select:focus { outline:none; border-color:var(--primary); }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .btn-submit { background:var(--primary); color:var(--white); width:100%; padding:12px; border:none; border-radius:8px; font-weight:600; cursor:pointer; font-size:1em; margin-top:8px; }
+        .help-text { font-size:0.8em; color:#888; margin-top:3px; }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        @keyframes slideDown { from{transform:translateY(-40px);opacity:0} to{transform:translateY(0);opacity:1} }
+        .success-msg,.error-msg { padding:12px 16px; border-radius:8px; font-weight:600; position:fixed; top:20px; right:20px; z-index:5000; min-width:280px; }
+        .success-msg { background:#d4edda; color:#155724; border-left:4px solid #28a745; }
+        .error-msg { background:#f8d7da; color:#721c24; border-left:4px solid #e74c3c; }
+        .info-banner { background:#e3f2fd; border-radius:10px; padding:14px 18px; margin-bottom:20px; border-left:4px solid var(--primary); font-size:0.9em; color:#1565c0; }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="navbar-logo">Sales Analysis</div>
+    <div class="navbar-links">
+        <a href="/dashboard" class="navbar-link">Dashboard</a>
+        <a href="/analytics" class="navbar-link">Analytics</a>
+        <a href="/admin/users" class="navbar-link active">Users</a>
+        <a href="/admin/logs" class="navbar-link">Activity Logs</a>
+        <a href="/logout" class="navbar-link logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <h1 class="page-title">User Management</h1>
+
+    <div class="info-banner">
+        <strong>Role-Based Access:</strong>
+        <strong>Admin</strong> — full access (inventory, sales, users, analytics) |
+        <strong>Salesperson</strong> — sell items, view stock, generate invoices, view limited reports
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>System Users</h2>
+            <button class="btn btn-primary" onclick="openAddUserModal()">+ Add User</button>
+        </div>
+        <div style="overflow-x:auto">
+        <table>
+            <thead>
+                <tr><th>#</th><th>Username</th><th>Full Name</th><th>Email</th><th>Role</th><th>Status</th><th>Created</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="usersTableBody">
+                <tr><td colspan="8" style="text-align:center;padding:30px;color:#999">Loading users...</td></tr>
+            </tbody>
+        </table>
+        </div>
+    </div>
+</div>
+
+<!-- ADD USER MODAL -->
+<div id="addUserModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('addUserModal')">&times;</span>
+        <h2>Create New User</h2>
+        <form onsubmit="submitAddUser(event)">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Username *</label>
+                    <input type="text" id="newUsername" required placeholder="e.g. john_cashier">
+                </div>
+                <div class="form-group">
+                    <label>Role *</label>
+                    <select id="newRole">
+                        <option value="salesperson">Salesperson</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="newName" placeholder="Display name">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="newEmail" placeholder="user@email.com">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Password *</label>
+                <input type="password" id="newPassword" required placeholder="Minimum 6 characters">
+                <span class="help-text">User can be given this password to log in</span>
+            </div>
+            <button type="submit" class="btn-submit">Create User</button>
+        </form>
+    </div>
+</div>
+
+<!-- EDIT USER MODAL -->
+<div id="editUserModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('editUserModal')">&times;</span>
+        <h2>Edit User</h2>
+        <input type="hidden" id="editUserId">
+        <form onsubmit="submitEditUser(event)">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="editName">
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="editRole">
+                        <option value="salesperson">Salesperson</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="editEmail">
+            </div>
+            <div class="form-group">
+                <label>New Password (leave blank to keep current)</label>
+                <input type="password" id="editPassword" placeholder="Leave blank to keep unchanged">
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select id="editActive">
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-submit">Save Changes</button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', loadUsers);
+
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+window.addEventListener('click',e=>{if(e.target.classList.contains('modal'))e.target.classList.remove('show');});
+
+function loadUsers() {
+    fetch('/api/users').then(r=>r.json()).then(data=>{
+        if(!data.success){showMsg('Failed to load users',false);return;}
+        const tbody=document.getElementById('usersTableBody');
+        if(!data.data.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:30px;color:#999">No users found</td></tr>';return;}
+        tbody.innerHTML='';
+        data.data.forEach((u,i)=>{
+            const roleClass=u.role==='admin'?'role-admin':'role-salesperson';
+            const statusClass=u.active!==false?'status-active':'status-inactive';
+            const statusText=u.active!==false?'Active':'Inactive';
+            const createdDate=u.created_at?u.created_at.split('T')[0]:'—';
+            tbody.innerHTML+=`<tr>
+                <td>${i+1}</td>
+                <td><strong>${u.username}</strong></td>
+                <td>${u.name||u.username}</td>
+                <td>${u.email||'—'}</td>
+                <td><span class="role-badge ${roleClass}">${u.role}</span></td>
+                <td class="${statusClass}">${statusText}</td>
+                <td>${createdDate}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning" onclick="openEditUser(${u.id})" style="margin-right:5px">Edit</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id},'${u.username}')">Delete</button>
+                </td>
+            </tr>`;
+        });
+        window._usersData = data.data;
+    });
+}
+
+function openAddUserModal(){document.getElementById('addUserModal').classList.add('show');}
+
+function submitAddUser(e) {
+    e.preventDefault();
+    const data={
+        username:document.getElementById('newUsername').value,
+        role:document.getElementById('newRole').value,
+        name:document.getElementById('newName').value,
+        email:document.getElementById('newEmail').value,
+        password:document.getElementById('newPassword').value
+    };
+    if(data.password.length<6){showMsg('Password must be at least 6 characters',false);return;}
+    fetch('/api/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+    .then(r=>r.json()).then(d=>{
+        if(d.success){showMsg('✓ User created!',true);closeModal('addUserModal');document.querySelector('#addUserModal form').reset();loadUsers();}
+        else showMsg(d.message,false);
+    });
+}
+
+function openEditUser(id) {
+    const u=window._usersData?.find(u=>u.id===id);
+    if(!u) return;
+    document.getElementById('editUserId').value=id;
+    document.getElementById('editName').value=u.name||'';
+    document.getElementById('editRole').value=u.role;
+    document.getElementById('editEmail').value=u.email||'';
+    document.getElementById('editPassword').value='';
+    document.getElementById('editActive').value=u.active!==false?'true':'false';
+    document.getElementById('editUserModal').classList.add('show');
+}
+
+function submitEditUser(e) {
+    e.preventDefault();
+    const id=document.getElementById('editUserId').value;
+    const data={
+        name:document.getElementById('editName').value,
+        role:document.getElementById('editRole').value,
+        email:document.getElementById('editEmail').value,
+        active:document.getElementById('editActive').value==='true',
+        password:document.getElementById('editPassword').value
+    };
+    fetch(`/api/users/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+    .then(r=>r.json()).then(d=>{
+        if(d.success){showMsg('✓ User updated!',true);closeModal('editUserModal');loadUsers();}
+        else showMsg(d.message,false);
+    });
+}
+
+function deleteUser(id, username) {
+    if(!confirm(`Delete user "${username}"? This cannot be undone.`)) return;
+    fetch(`/api/users/${id}`,{method:'DELETE'}).then(r=>r.json()).then(d=>{
+        if(d.success){showMsg('✓ User deleted!',true);loadUsers();}
+        else showMsg(d.message,false);
+    });
+}
+
+function showMsg(msg,success){
+    const d=document.createElement('div');d.className=success?'success-msg':'error-msg';d.textContent=msg;
+    d.style.cssText='position:fixed;top:20px;right:20px;z-index:5000;min-width:280px;';
+    document.body.appendChild(d);setTimeout(()=>d.remove(),3500);
+}
+</script>
+</body>
+</html>

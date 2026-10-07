@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sales Analysis System</title>
+    <style>
+        :root {
+            --primary: #2c8cfb; --primary-light: #5cacfa; --primary-dark: #1a5fb4;
+            --white: #fff; --gray-light: #f5f7fa; --gray-dark: #2d3748;
+            --border: #e2e8f0; --success: #28a745; --danger: #e74c3c; --warning: #f0ad4e;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI',sans-serif; background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%); min-height:100vh; color:var(--gray-dark); }
+        .navbar {
+            background:var(--white); box-shadow:0 2px 8px rgba(44,140,251,0.1);
+            padding:0 30px; display:flex; justify-content:space-between; align-items:center; height:60px;
+        }
+        .navbar-logo { font-size:1.4em; font-weight:700; color:var(--primary); }
+        .navbar-links { display:flex; gap:5px; align-items:center; }
+        .navbar-link {
+            color:var(--gray-dark); text-decoration:none; font-weight:600;
+            padding:7px 14px; border-radius:6px; transition:all 0.3s; font-size:0.9em; cursor:pointer;
+        }
+        .navbar-link:hover, .navbar-link.active { background:var(--primary); color:var(--white); }
+        .navbar-link.logout { background:var(--danger); color:var(--white); }
+        .navbar-link.logout:hover { background:#c0392b; }
+        .navbar-user { color:#888; font-size:0.85em; padding:0 10px; }
+        .role-badge {
+            font-size:0.75em; padding:3px 8px; border-radius:12px; font-weight:700;
+            background:#e3f2fd; color:var(--primary);
+        }
+        .role-badge.admin { background:#fff3e0; color:#e65100; }
+
+        .container { max-width:1400px; margin:25px auto; padding:0 20px; }
+        .button-bar {
+            display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+            gap:12px; margin-bottom:25px; background:var(--white);
+            padding:18px; border-radius:12px; box-shadow:0 4px 12px rgba(44,140,251,0.1);
+        }
+        .btn {
+            padding:11px 16px; border:none; border-radius:8px; font-size:0.9em;
+            font-weight:600; cursor:pointer; transition:all 0.3s; display:flex;
+            align-items:center; justify-content:center; gap:6px;
+        }
+        .btn:hover { transform:translateY(-2px); opacity:0.92; }
+        .btn-add { background:var(--primary); color:var(--white); }
+        .btn-search { background:var(--primary-light); color:var(--white); }
+        .btn-update { background:#6c5ce7; color:var(--white); }
+        .btn-delete { background:var(--danger); color:var(--white); }
+        .btn-sell { background:var(--success); color:var(--white); }
+        .btn-customers { background:#00b894; color:var(--white); }
+        .btn-invoices { background:#fd79a8; color:var(--white); }
+        .btn-disabled { background:#ccc; color:#888; cursor:not-allowed; }
+        .btn-disabled:hover { transform:none; }
+
+        .stats-container { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:18px; margin-bottom:25px; }
+        .stat-card {
+            background:var(--white); border-radius:12px; padding:22px;
+            text-align:center; box-shadow:0 4px 12px rgba(44,140,251,0.1);
+            border-left:4px solid var(--primary); transition:transform 0.3s;
+        }
+        .stat-card:hover { transform:translateY(-4px); }
+        .stat-card h3 { color:#666; font-size:0.8em; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; }
+        .stat-value { color:var(--primary); font-size:2em; font-weight:bold; }
+
+        .table-container {
+            background:var(--white); border-radius:12px; padding:22px;
+            box-shadow:0 4px 12px rgba(44,140,251,0.1);
+        }
+        .table-container h2 { color:var(--primary); margin-bottom:18px; font-size:1.3em; }
+        table { width:100%; border-collapse:collapse; }
+        thead { background:linear-gradient(90deg,var(--primary) 0%,var(--primary-light) 100%); color:var(--white); }
+        thead th { padding:13px 14px; text-align:left; font-weight:600; text-transform:uppercase; font-size:0.8em; }
+        tbody tr { border-bottom:1px solid var(--border); transition:background 0.2s; }
+        tbody tr:hover { background:rgba(92,172,250,0.05); }
+        tbody td { padding:11px 14px; }
+        .empty-state { text-align:center; color:#999; padding:40px !important; }
+        .stock-low { color:var(--danger); font-weight:bold; }
+        .stock-ok { color:var(--success); }
+        .category-badge {
+            font-size:0.75em; padding:2px 8px; border-radius:10px;
+            background:#e3f2fd; color:var(--primary-dark); font-weight:600;
+        }
+
+        /* MODALS */
+        .modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.7); }
+        .modal.show { display:flex; justify-content:center; align-items:center; animation:fadeIn 0.3s; }
+        .modal-content {
+            background:var(--white); padding:30px; border-radius:16px; width:90%;
+            max-width:500px; box-shadow:0 20px 60px rgba(0,0,0,0.3);
+            animation:slideDown 0.3s; position:relative; max-height:90vh; overflow-y:auto;
+        }
+        .modal-content h2 {
+            color:var(--white); background:linear-gradient(135deg,var(--primary),var(--primary-light));
+            padding:16px; margin:-30px -30px 22px -30px; border-radius:15px 15px 0 0; font-size:1.2em;
+        }
+        .close { color:var(--white); position:absolute; right:22px; top:18px; font-size:28px; font-weight:bold; cursor:pointer; transition:transform 0.2s; }
+        .close:hover { transform:rotate(90deg); }
+        .form-group { display:flex; flex-direction:column; margin-bottom:16px; }
+        .form-group label { font-weight:600; color:var(--gray-dark); margin-bottom:7px; font-size:0.9em; }
+        .form-group input, .form-group select, .form-group textarea {
+            padding:11px 13px; border:2px solid var(--border); border-radius:8px;
+            font-size:0.95em; transition:all 0.3s; font-family:inherit;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(44,140,251,0.1);
+        }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .btn-primary { background:var(--primary); color:var(--white); width:100%; padding:12px; border:none; border-radius:8px; font-weight:600; cursor:pointer; font-size:1em; transition:all 0.3s; margin-top:5px; }
+        .btn-primary:hover { background:var(--primary-dark); }
+        .btn-danger { background:var(--danger); color:var(--white); width:100%; padding:12px; border:none; border-radius:8px; font-weight:600; cursor:pointer; font-size:1em; }
+        .profit-display { background:#e6f7ff; border-radius:8px; padding:12px; margin:12px 0; font-size:0.9em; border-left:3px solid var(--primary); }
+        .profit-display span { font-weight:700; color:var(--primary); }
+
+        .success-message, .error-message {
+            padding:12px 16px; border-radius:8px; font-weight:600;
+            position:fixed; top:20px; right:20px; z-index:3000; min-width:280px;
+        }
+        .success-message { background:#d4edda; color:#155724; border-left:4px solid #28a745; }
+        .error-message { background:#f8d7da; color:#721c24; border-left:4px solid #e74c3c; }
+
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        @keyframes slideDown { from{transform:translateY(-40px);opacity:0} to{transform:translateY(0);opacity:1} }
+        @media(max-width:768px) {
+            .button-bar { grid-template-columns:1fr 1fr; }
+            .stats-container { grid-template-columns:1fr 1fr; }
+            .form-row { grid-template-columns:1fr; }
+        }
+        .admin-only { display: none; }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="navbar-logo">Sales Analysis</div>
+    <div class="navbar-links">
+        <a href="/dashboard" class="navbar-link active">Dashboard</a>
+        <a href="/analytics" class="navbar-link">Analytics</a>
+        <a href="/customers" class="navbar-link">Customers</a>
+        <span class="navbar-link admin-only" id="usersNavLink" onclick="window.location.href='/admin/users'">Users</span>
+        <span class="navbar-link admin-only" id="logsNavLink" onclick="window.location.href='/admin/logs'">Logs</span>
+        <span class="navbar-user" id="userDisplay">{{ username }}</span>
+        <span class="role-badge" id="roleBadge">{{ role }}</span>
+        <a href="/logout" class="navbar-link logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="button-bar">
+        <button class="btn btn-add admin-only" onclick="openAddModal()">Add Item</button>
+        <button class="btn btn-search" onclick="openSearchModal()">Search</button>
+        <button class="btn btn-update admin-only" onclick="openUpdateModal()">Update</button>
+        <button class="btn btn-delete admin-only" onclick="openDeleteModal()">Delete</button>
+        <button class="btn btn-sell" onclick="openSellModal()">Sell</button>
+        <button class="btn btn-customers" onclick="window.location.href='/customers'">Customers</button>
+        <button class="btn btn-invoices" onclick="window.location.href='/customers#invoices'">Invoices</button>
+    </div>
+
+    <div class="stats-container">
+        <div class="stat-card"><h3>Total Items</h3><p class="stat-value" id="totalItems">0</p></div>
+        <div class="stat-card"><h3>Total Quantity</h3><p class="stat-value" id="totalQuantity">0</p></div>
+        <div class="stat-card"><h3>Total Value</h3><p class="stat-value" id="totalValue">₹0</p></div>
+        <div class="stat-card"><h3>Low Stock</h3><p class="stat-value" style="color:#e74c3c" id="lowStock">0</p></div>
+    </div>
+
+    <div class="table-container">
+        <h2>Inventory List</h2>
+        <div style="overflow-x:auto">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th><th>Name</th><th>Category</th><th>Qty</th>
+                    <th>Location</th><th>Supplier</th><th>Price (₹)</th><th>Total Value</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"><tr><td colspan="8" class="empty-state">Loading...</td></tr></tbody>
+        </table>
+        </div>
+    </div>
+</div>
+
+<!-- ADD ITEM MODAL (Admin only) -->
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('addModal')">&times;</span>
+        <h2>Add New Item</h2>
+        <form onsubmit="submitAddForm(event)">
+            <div class="form-row">
+                <div class="form-group"><label>Item Name *</label><input type="text" id="addName" required></div>
+                <div class="form-group"><label>Category *</label>
+                    <select id="addCategory">
+                        <option>Laptop</option><option>Monitor</option><option>Accessory</option>
+                        <option>Component</option><option>General</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Quantity *</label><input type="number" id="addQuantity" min="0" required></div>
+                <div class="form-group"><label>Price (₹) *</label><input type="number" id="addPrice" step="0.01" min="0" required></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Location *</label><input type="text" id="addLocation" required></div>
+                <div class="form-group"><label>Supplier *</label><input type="text" id="addSupplier" required></div>
+            </div>
+            <button type="submit" class="btn-primary">Add Item</button>
+        </form>
+    </div>
+</div>
+
+<!-- SEARCH MODAL -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('searchModal')">&times;</span>
+        <h2>Search Inventory</h2>
+        <div class="form-group">
+            <label>Search by ID, Name, Location, Category, or Supplier:</label>
+            <input type="text" id="searchInput" placeholder="e.g., A01 or Laptop">
+        </div>
+        <button class="btn-primary" onclick="performSearch()">Search</button>
+        <div id="searchResults" style="margin-top:15px;"></div>
+    </div>
+</div>
+
+<!-- UPDATE MODAL (Admin only) -->
+<div id="updateModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('updateModal')">&times;</span>
+        <h2>Update Item</h2>
+        <div class="form-group">
+            <label>Find Item by Unique ID (e.g. A01):</label>
+            <input type="text" id="updateSearch" placeholder="Enter Unique ID">
+        </div>
+        <button class="btn-primary" onclick="findItemForUpdate()">Find Item</button>
+        <div id="updateForm" style="display:none; margin-top:18px;">
+            <form onsubmit="submitUpdateForm(event)">
+                <input type="hidden" id="updateItemId">
+                <div class="form-row">
+                    <div class="form-group"><label>Name</label><input type="text" id="updateName" required></div>
+                    <div class="form-group"><label>Category</label>
+                        <select id="updateCategory">
+                            <option>Laptop</option><option>Monitor</option><option>Accessory</option>
+                            <option>Component</option><option>General</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Quantity</label><input type="number" id="updateQuantity" min="0" required></div>
+                    <div class="form-group"><label>Price (₹)</label><input type="number" id="updatePrice" step="0.01" required></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Location</label><input type="text" id="updateLocation" required></div>
+                    <div class="form-group"><label>Supplier</label><input type="text" id="updateSupplier" required></div>
+                </div>
+                <button type="submit" class="btn-primary">Update Item</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- DELETE MODAL (Admin only) -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('deleteModal')">&times;</span>
+        <h2>Remove Item</h2>
+        <div class="form-group">
+            <label>Enter Unique ID to Remove (e.g. A01):</label>
+            <input type="text" id="deleteItemId" placeholder="Unique ID">
+        </div>
+        <button class="btn-danger" onclick="confirmDelete()">Remove Item</button>
+    </div>
+</div>
+
+<!-- SELL MODAL -->
+<div id="sellModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('sellModal')">&times;</span>
+        <h2>Record Sale</h2>
+        <form onsubmit="submitSellForm(event)">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Item Unique ID *</label>
+                    <input type="text" id="sellItemId" placeholder="e.g. A01" oninput="loadItemDetails()">
+                </div>
+                <div class="form-group">
+                    <label>Item Name (auto-filled)</label>
+                    <input type="text" id="sellItemName" readonly placeholder="Auto-filled">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Quantity *</label><input type="number" id="sellQuantity" min="1" required oninput="calculateProfit()"></div>
+                <div class="form-group"><label>Selling Price (₹) *</label><input type="number" id="sellPrice" step="0.01" required oninput="calculateProfit()"></div>
+            </div>
+            <div id="profitDisplay" class="profit-display" style="display:none;">
+                Cost Price: ₹<span id="costPriceDisplay">0</span> |
+                Stock: <span id="stockDisplay">0</span> |
+                Est. Profit: ₹<span id="profitEstimate" style="color:#28a745">0</span>
+            </div>
+            <hr style="margin:14px 0; border:none; border-top:1px solid #eee;">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Customer</label>
+                    <select id="sellCustomerId" onchange="onCustomerSelect()">
+                        <option value="">Walk-in Customer</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select id="sellPaymentMethod">
+                        <option>Cash</option><option>UPI</option><option>Card</option><option>Net Banking</option><option>Credit</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row" id="walkinFields">
+                <div class="form-group"><label>Customer Name</label><input type="text" id="sellCustomerName" placeholder="Walk-in Customer"></div>
+                <div class="form-group"><label>Phone (optional)</label><input type="text" id="sellCustomerPhone" placeholder="+91..."></div>
+            </div>
+            <div class="form-group"><label>Notes (optional)</label><input type="text" id="sellNotes" placeholder="Any remarks..."></div>
+            <button type="submit" class="btn-primary">Record Sale & Generate Invoice</button>
+        </form>
+    </div>
+</div>
+
+<script>
+const userRole = '{{ role }}';
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (userRole === 'admin') {
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
+        document.getElementById('roleBadge').classList.add('admin');
+    }
+    loadInventory();
+    loadCustomersForSell();
+});
+
+function openAddModal() { document.getElementById('addModal').classList.add('show'); }
+function openSearchModal() { document.getElementById('searchModal').classList.add('show'); document.getElementById('searchResults').innerHTML=''; }
+function openUpdateModal() { document.getElementById('updateModal').classList.add('show'); document.getElementById('updateForm').style.display='none'; }
+function openDeleteModal() { document.getElementById('deleteModal').classList.add('show'); }
+function openSellModal() { document.getElementById('sellModal').classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+window.addEventListener('click', e => { if (e.target.classList.contains('modal')) e.target.classList.remove('show'); });
+
+function loadInventory() {
+    fetch('/api/items').then(r=>r.json()).then(data => {
+        if (data.success) { displayItems(data.data); updateStats(data.data); }
+    }).catch(() => showError('Failed to load inventory'));
+}
+
+function displayItems(items) {
+    const tbody = document.getElementById('tableBody');
+    if (!items || items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No items. Add your first item!</td></tr>';
+        return;
+    }
+    tbody.innerHTML = '';
+    items.forEach(item => {
+        const totalValue = (item.quantity * item.price).toFixed(2);
+        const stockClass = item.quantity <= 2 ? 'stock-low' : 'stock-ok';
+        tbody.innerHTML += `<tr>
+            <td><strong style="color:var(--primary)">${item.unique_id||item.id}</strong></td>
+            <td><strong>${item.name}</strong></td>
+            <td><span class="category-badge">${item.category||'General'}</span></td>
+            <td class="${stockClass}">${item.quantity}${item.quantity<=2?' ':''}</td>
+            <td>${item.location}</td><td>${item.supplier}</td>
+            <td>₹${parseFloat(item.price).toFixed(2)}</td>
+            <td>₹${totalValue}</td>
+        </tr>`;
+    });
+}
+
+function updateStats(items) {
+    document.getElementById('totalItems').textContent = items.length;
+    document.getElementById('totalQuantity').textContent = items.reduce((s,i)=>s+i.quantity,0);
+    document.getElementById('totalValue').textContent = '₹' + items.reduce((s,i)=>s+(i.quantity*i.price),0).toLocaleString('en-IN',{maximumFractionDigits:0});
+    document.getElementById('lowStock').textContent = items.filter(i=>i.quantity<=2).length;
+}
+
+function submitAddForm(e) {
+    e.preventDefault();
+    const item = {
+        name: document.getElementById('addName').value,
+        category: document.getElementById('addCategory').value,
+        quantity: parseInt(document.getElementById('addQuantity').value),
+        price: parseFloat(document.getElementById('addPrice').value),
+        location: document.getElementById('addLocation').value,
+        supplier: document.getElementById('addSupplier').value
+    };
+    fetch('/api/items',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(item)})
+    .then(r=>r.json()).then(data=>{
+        if(data.success){showSuccess('✓ Item added! ID: '+data.data.unique_id);document.querySelector('#addModal form').reset();closeModal('addModal');loadInventory();}
+        else showError(data.message);
+    });
+}
+
+function performSearch() {
+    const q = document.getElementById('searchInput').value;
+    if(!q){showError('Enter search term');return;}
+    fetch(`/api/search?q=${encodeURIComponent(q)}`).then(r=>r.json()).then(data=>{
+        const div = document.getElementById('searchResults');
+        if(!data.success||!data.data.length){div.innerHTML='<p style="color:#999;text-align:center">No items found</p>';return;}
+        div.innerHTML='<p style="color:var(--primary);font-weight:bold;margin-bottom:10px">Found '+data.data.length+' item(s):</p>';
+        data.data.forEach(item=>{
+            div.innerHTML+=`<div style="padding:10px;margin:8px 0;background:#f5f7fa;border-radius:8px;border-left:4px solid var(--primary)">
+                <strong>${item.unique_id||item.id}: ${item.name}</strong> <span class="category-badge">${item.category||'General'}</span><br>
+                <small>Qty: ${item.quantity} | ₹${item.price} | ${item.location}</small></div>`;
+        });
+    });
+}
+
+function findItemForUpdate() {
+    const q = document.getElementById('updateSearch').value.trim();
+    if(!q){showError('Enter ID');return;}
+    fetch(`/api/search?q=${encodeURIComponent(q)}`).then(r=>r.json()).then(data=>{
+        if(data.success&&data.data.length>0){
+            const item=data.data[0];
+            document.getElementById('updateItemId').value=item.unique_id||item.id;
+            document.getElementById('updateName').value=item.name;
+            document.getElementById('updateCategory').value=item.category||'General';
+            document.getElementById('updateQuantity').value=item.quantity;
+            document.getElementById('updateLocation').value=item.location;
+            document.getElementById('updateSupplier').value=item.supplier;
+            document.getElementById('updatePrice').value=item.price;
+            document.getElementById('updateForm').style.display='block';
+        } else showError('Item not found');
+    });
+}
+
+function submitUpdateForm(e) {
+    e.preventDefault();
+    const id = document.getElementById('updateItemId').value;
+    const data = {
+        name:document.getElementById('updateName').value,
+        category:document.getElementById('updateCategory').value,
+        quantity:parseInt(document.getElementById('updateQuantity').value),
+        location:document.getElementById('updateLocation').value,
+        supplier:document.getElementById('updateSupplier').value,
+        price:parseFloat(document.getElementById('updatePrice').value)
+    };
+    fetch(`/api/items/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+    .then(r=>r.json()).then(d=>{
+        if(d.success){showSuccess('✓ Item updated!');closeModal('updateModal');loadInventory();}
+        else showError(d.message);
+    });
+}
+
+function confirmDelete() {
+    const id = document.getElementById('deleteItemId').value.trim();
+    if(!id){showError('Enter ID');return;}
+    if(!confirm(`Delete item ${id}?`))return;
+    fetch(`/api/items/${id}`,{method:'DELETE'}).then(r=>r.json()).then(d=>{
+        if(d.success){showSuccess('✓ Item deleted!');closeModal('deleteModal');document.getElementById('deleteItemId').value='';loadInventory();}
+        else showError(d.message);
+    });
+}
+
+let currentItemCostPrice = 0;
+function loadItemDetails() {
+    const id = document.getElementById('sellItemId').value.trim();
+    if(!id)return;
+    fetch(`/api/search?q=${encodeURIComponent(id)}`).then(r=>r.json()).then(data=>{
+        if(data.success&&data.data.length>0){
+            const item=data.data[0];
+            document.getElementById('sellItemName').value=item.name;
+            currentItemCostPrice=item.price;
+            document.getElementById('costPriceDisplay').textContent=item.price.toFixed(2);
+            document.getElementById('stockDisplay').textContent=item.quantity;
+            document.getElementById('profitDisplay').style.display='block';
+            calculateProfit();
+        }
+    });
+}
+
+function calculateProfit() {
+    const qty=parseInt(document.getElementById('sellQuantity').value)||0;
+    const sp=parseFloat(document.getElementById('sellPrice').value)||0;
+    if(qty>0&&sp>0&&currentItemCostPrice>0){
+        document.getElementById('profitEstimate').textContent=((sp-currentItemCostPrice)*qty).toFixed(2);
+    }
+}
+
+function loadCustomersForSell() {
+    fetch('/api/customers').then(r=>r.json()).then(data=>{
+        if(data.success){
+            const sel=document.getElementById('sellCustomerId');
+            data.data.forEach(c=>{sel.innerHTML+=`<option value="${c.id}">${c.name}${c.phone?' ('+c.phone+')':''}</option>`;});
+        }
+    });
+}
+
+function onCustomerSelect() {
+    const val=document.getElementById('sellCustomerId').value;
+    document.getElementById('walkinFields').style.display=val?'none':'grid';
+}
+
+function submitSellForm(e) {
+    e.preventDefault();
+    const customerId=document.getElementById('sellCustomerId').value;
+    const saleData={
+        item_id:document.getElementById('sellItemId').value.trim(),
+        quantity:parseInt(document.getElementById('sellQuantity').value),
+        selling_price:parseFloat(document.getElementById('sellPrice').value),
+        customer_id:customerId?parseInt(customerId):null,
+        customer_name:customerId?document.getElementById('sellCustomerId').options[document.getElementById('sellCustomerId').selectedIndex].text:document.getElementById('sellCustomerName').value||'Walk-in Customer',
+        customer_phone:customerId?'':document.getElementById('sellCustomerPhone').value,
+        payment_method:document.getElementById('sellPaymentMethod').value,
+        notes:document.getElementById('sellNotes').value
+    };
+    fetch('/api/sell',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(saleData)})
+    .then(r=>r.json()).then(data=>{
+        if(data.success){
+            showSuccess('✓ Sale recorded! Profit: ₹'+data.data.profit.toFixed(2));
+            closeModal('sellModal');
+            document.querySelector('#sellModal form').reset();
+            document.getElementById('profitDisplay').style.display='none';
+            document.getElementById('walkinFields').style.display='grid';
+            loadInventory();
+            if(confirm('View Invoice for this sale?')){window.open('/invoice/'+data.data.id,'_blank');}
+        } else showError(data.message);
+    });
+}
+
+function showSuccess(msg){const d=document.createElement('div');d.className='success-message';d.textContent=msg;d.style.cssText='position:fixed;top:20px;right:20px;z-index:5000;min-width:280px;';document.body.appendChild(d);setTimeout(()=>d.remove(),3500);}
+function showError(msg){const d=document.createElement('div');d.className='error-message';d.textContent=msg;d.style.cssText='position:fixed;top:20px;right:20px;z-index:5000;min-width:280px;';document.body.appendChild(d);setTimeout(()=>d.remove(),4000);}
+</script>
+</body>
+</html>

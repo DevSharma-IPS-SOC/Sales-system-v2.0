@@ -1,0 +1,15 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "Admin",
+      "password": "3b612c75a7b5048a435fb6ec81e52ff92d6d795a8b5a9c17070f6a63c97a53b2",
+      "role": "admin",
+      "name": "Administrator",
+      "email": "admin@store.com",
+      "created_at": "2026-04-22T07:40:42.918249",
+      "active": true
+    }
+  ],
+  "last_id": 1
+}
